@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox AI Script Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .main-content {
+            flex-grow: 1;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e9e9e9;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        #history {
+            list-style-type: none;
+            padding: 0;
+        }
+        #history li {
+            padding: 8px;
+            margin-bottom: 5px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #history li:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body onload="loadHistory()">
+    <div class="container">
+        <div class="sidebar">
+            <h2>سجل البحث</h2>
+            <ul id="history"></ul>
+        </div>
+        <div class="main-content">
+            <h1>Roblox AI Script Generator</h1>
+            <textarea id="prompt" placeholder="اكتب طلبك هنا..."></textarea>
+            <button onclick="generateScript()">إنشاء السكربت</button>
+            <div id="response"><p>سيظهر السكربت الذي تم إنشاؤه هنا.</p></div>
+        </div>
+    </div>
+
+    <script>
+        const promptInput = document.getElementById('prompt');
+        const responseContainer = document.getElementById('response');
+        const historyList = document.getElementById('history');
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('robloxScriptHistory')) || [];
+            historyList.innerHTML = '';
+            history.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                li.onclick = () => {
+                    promptInput.value = item;
+                };
+                historyList.appendChild(li);
+            });
+        }
+
+        function saveToHistory(prompt) {
+            let history = JSON.parse(localStorage.getItem('robloxScriptHistory')) || [];
+            if (!history.includes(prompt)) {
+                history.unshift(prompt); // Add to the beginning
+                if (history.length > 10) { // Keep only the last 10 items
+                    history.pop();
+                }
+                localStorage.setItem('robloxScriptHistory', JSON.stringify(history));
+                loadHistory();
+            }
+        }
+
+        async function generateScript() {
+            const prompt = promptInput.value;
+            if (!prompt) return;
+
+            responseContainer.innerHTML = '<p>جاري إنشاء السكربت...</p>';
+            saveToHistory(prompt);
+
+            try {
+                const response = await fetch('/api/generate-script', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    responseContainer.innerHTML = `<pre><code>${escapeHtml(data.script)}</code></pre>`;
+                } else {
+                    responseContainer.innerHTML = `<p style="color: red;">${data.error}</p>`;
+                }
+            } catch (error) {
+                responseContainer.innerHTML = `<p style="color: red;">حدث خطأ: ${error.message}</p>`;
+            }
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>

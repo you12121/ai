@@ -1,79 +1,203 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Roblox AI Script Generator</title>
     <style>
+        /* عام */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f4f4f4;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #222;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
         }
+
         .container {
             display: flex;
-            gap: 20px;
+            gap: 24px;
+            width: 100%;
+            max-width: 1100px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
         }
+
+        .sidebar {
+            width: 280px;
+            background-color: #f7f9fc;
+            padding: 24px;
+            box-sizing: border-box;
+            border-left: 6px solid #667eea;
+        }
+
+        .sidebar h2 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: #4b4b6a;
+            text-align: center;
+            user-select: none;
+        }
+
+        #history {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        #history li {
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            background-color: #e3e6f3;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.25s ease;
+            font-size: 0.95rem;
+            color: #333;
+            user-select: none;
+        }
+
+        #history li:hover {
+            background-color: #b3b8e6;
+            color: #222;
+        }
+
         .main-content {
             flex-grow: 1;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .sidebar {
-            width: 250px;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1, h2 {
-            text-align: center;
-        }
-        textarea {
-            width: 100%;
-            height: 150px;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
+            padding: 30px 32px;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
         }
-        button {
+
+        .main-content h1 {
+            font-weight: 800;
+            font-size: 2.2rem;
+            margin: 0 0 24px 0;
+            color: #4b4b6a;
+            text-align: center;
+            user-select: none;
+        }
+
+        textarea#prompt {
             width: 100%;
-            padding: 10px;
-            background-color: #007bff;
+            height: 180px;
+            padding: 16px 14px;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+            color: #222;
+        }
+
+        textarea#prompt:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 6px rgba(118, 75, 162, 0.6);
+            background-color: #fcfcff;
+        }
+
+        button {
+            margin-top: 14px;
+            padding: 14px 20px;
+            background-color: #667eea;
             color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
             border: none;
-            border-radius: 4px;
+            border-radius: 12px;
             cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            user-select: none;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
         }
+
         button:hover {
-            background-color: #0056b3;
+            background-color: #5a6dd9;
+            box-shadow: 0 6px 18px rgba(90, 109, 217, 0.8);
         }
+
+        button:active {
+            background-color: #4a58bb;
+            box-shadow: 0 3px 8px rgba(74, 88, 187, 0.9);
+        }
+
         #response {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #e9e9e9;
-            border-radius: 4px;
+            margin-top: 28px;
+            padding: 18px 20px;
+            background-color: #f0f2f8;
+            border-radius: 14px;
+            min-height: 220px;
             white-space: pre-wrap;
             word-wrap: break-word;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1rem;
+            color: #2c2c2c;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.07);
+            user-select: text;
+            overflow-y: auto;
+            max-height: 400px;
         }
-        #history {
-            list-style-type: none;
-            padding: 0;
+
+        /* Scrollbar for #history and #response */
+        #history::-webkit-scrollbar,
+        #response::-webkit-scrollbar {
+            width: 8px;
         }
-        #history li {
-            padding: 8px;
-            margin-bottom: 5px;
-            background-color: #f0f0f0;
-            border-radius: 4px;
-            cursor: pointer;
+
+        #history::-webkit-scrollbar-thumb,
+        #response::-webkit-scrollbar-thumb {
+            background-color: #a0a4d9;
+            border-radius: 6px;
         }
-        #history li:hover {
-            background-color: #ddd;
+
+        #history::-webkit-scrollbar-track,
+        #response::-webkit-scrollbar-track {
+            background-color: #e3e6f3;
+            border-radius: 6px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+            .container {
+                flex-direction: column-reverse;
+                max-width: 100%;
+            }
+            .sidebar {
+                width: 100%;
+                border-left: none;
+                border-top: 6px solid #667eea;
+                padding: 16px;
+                max-height: 200px;
+                overflow-y: auto;
+            }
+            .main-content {
+                padding: 20px 16px;
+            }
+            textarea#prompt {
+                height: 140px;
+            }
+            #response {
+                min-height: 180px;
+                max-height: 250px;
+            }
         }
     </style>
 </head>
@@ -92,6 +216,7 @@
     </div>
 
     <script>
+        // ... الكود السابق كما هو بدون تغيير
         const promptInput = document.getElementById('prompt');
         const responseContainer = document.getElementById('response');
         const historyList = document.getElementById('history');

@@ -44,7 +44,7 @@ def generate_script():
         """
 
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant specialized in writing Roblox Lua scripts. Use your knowledge and the provided Roblox Developer Hub search URL to generate accurate and high-quality scripts."},
                 {"role": "user", "content": enhanced_prompt}

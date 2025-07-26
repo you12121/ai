@@ -1,7 +1,7 @@
 import os
 import logging
 from flask import Flask, request, jsonify, send_from_directory
-from openai import OpenAI
+import openai  # ← تعديل هنا
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -10,10 +10,10 @@ app = Flask(__name__, static_folder='../frontend')
 
 # Configure OpenAI API
 try:
-    client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+    openai.api_key = os.environ["OPENAI_API_KEY"]  # ← تعديل هنا
 except KeyError:
     logging.error("OPENAI_API_KEY environment variable not set.")
-    client = None
+    openai.api_key = None
 
 @app.route('/')
 def serve_index():
@@ -21,7 +21,7 @@ def serve_index():
 
 @app.route('/api/generate-script', methods=['POST'])
 def generate_script():
-    if not client:
+    if not openai.api_key:
         return jsonify({'error': 'OpenAI API key not configured'}), 500
 
     data = request.json
@@ -43,14 +43,14 @@ def generate_script():
         {prompt}
         """
 
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+        response = openai.ChatCompletion.create(  # ← تعديل هنا
+            model="gpt-3.5-turbo",  # تأكد أن هذا متاح لحسابك
             messages=[
                 {"role": "system", "content": "You are a helpful assistant specialized in writing Roblox Lua scripts. Use your knowledge and the provided Roblox Developer Hub search URL to generate accurate and high-quality scripts."},
                 {"role": "user", "content": enhanced_prompt}
             ]
         )
-        script = response.choices[0].message.content
+        script = response.choices[0].message['content']  # ← تعديل بسيط هنا لأن `message` dict
         logging.debug(f"Generated script: {script}")
         return jsonify({'script': script})
     except Exception as e:
